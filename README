@@ -1,0 +1,40 @@
+Tema 2 APD - Calciu Alexandru
+
+Aceasta tema nu mi-a luat extrem de mult timp dar
+a durat ceva pana sa ma prind exact ce trebuie sa fac in ea.
+
+Pentru a simula rularea unui task am folosit un sleep improvizat
+folosind functia System.nanoTime(). Am folosit aceasta functie pentru
+ca am citit un thread pe stack overflow despre cum sa masori timpul
+in Java si asta era data ca cea mai precisa metoda. Apoi am vazut
+ca timer-ul din tema foloseste currentTimeMillis() dar era prea tarziu
+sa dau inapoi.
+
+Pentru a alege la care host trimit un task am folosit design pattern-ul
+Strategy, facand o interfata numita SchedulingStrategy cu o metoda getHost
+care are ca scop returnarea host-ului care trebuie sa primeasca task.
+Aceasta interfata este implementata de 4 clase, cate una pentru fiecare
+algoritm, si in fiecare implementare a functiei se afla logica corespunzatoare
+pentru fiecare algoritm de selectie. Pentru contorul din RoundRobin am ales
+sa folosesc un AtomicInteger pentru a asigura accesul sincron.
+
+Logica principala din run este un while(running) care practic simuleaza
+timpul cat ruleaza host-ul(care se termina cand se da shutdown) in care
+se decide ce task trebuie rulat. Pentru a stoca task-urile amm folosit un
+PriorityBlockingQueue cu un comparator folosit pentru a sorta task-urile
+mai intai descrescator dupa prioritate si apoi crescator dupa timpul de start,
+conform cerintei. Apoi am luat doua cazuri.
+
+Daca task-ul nu este preemptibil inseamna ca nu poate fi intrerupt, deci
+il rulez(dau sleep) si ii decrementez timpul ramas pana cand acesta ajunge
+la 0. In acel moment il scot din coada for good.
+
+Daca task-ul este preemptibil il las sa ruleze o milisecunda, urmand apoi
+sa trec din nou in procesul de alegere al task-ului prioritar. Astfel,
+se asigura faptul ca mereu se va scadea din left-ul task-ului care trebuie
+sa ruleze in acel moment. Poate fi considerata o forma de busy waiting si
+probabil este dar conform forumului acest lucru este permis deci imi
+consider rezolvarea una valida.
+
+Celelalte functii din MyHost se comporta asa cum e intuitiv sa o faca si nu au
+mai mult de 5 randuri.
